@@ -73,19 +73,20 @@
 </head>
 <body>
     
-    <form id="signupForm">
+    <form id="signupForm" method="POST">
+        {% csrf_token %}
         <h2>SignUp</h2>
-        <div >
+        <div>
             <label for="username">Username:</label>
-            <input type="text" id="username" placeholder="👩‍💻"required>
+            <input type="text" name="username" required>
         </div>
-        <div >
+        <div>
             <label for="email">Email:</label>
-            <input type="email" id="email" placeholder="✉️" required>
+            <input type="email" name="email" required>
         </div>
-        <div >
-            <label for="language">Enter your language:</label>
-            <select id="language" required>
+        <div>
+            <label for="language">Language:</label>
+            <select name="language" required>
                 <option value="">🌍️ Select Language</option>
                 <option value="English">English</option>
                 <option value="Telugu">Telugu</option>
@@ -94,20 +95,28 @@
                 <option value="Kannada">Kannada</option>
             </select>
         </div>
-        <div >
-            <label for="password">Password:</label>
-            <input type="password" id="password" placeholder="🔑️" required>
+        <div>
+            <label for="password1">Password:</label>
+            <input type="password" name="password1" required>
         </div>
+        <div>
+            <label for="password2">Confirm Password:</label>
+            <input type="password" name="password2" required>
+        </div>
+        <div>
+            <button type="submit">Signup</button>
+        </div>
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li style="color: red;">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
 
-        <div >
-            <label for="confirmPassword">Confirm Password:</label>
-            <input type="password" id="confirmPassword" placeholder="✅️" required>
-        </div>
 
-        <div id="buttons">
-            <button type="submit" form="signupForm">Signup</button>
-        </div>
     </form>
+    
     
 </body>
 </html>

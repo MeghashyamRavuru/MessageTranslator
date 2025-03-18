@@ -72,26 +72,28 @@
     </style>
 </head>
 <body>
-
-    <form id="loginForm">
+    <form id="loginForm" method="POST">
+        {% csrf_token %}
         <h2>Login</h2>
-
         <div>
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" placeholder="👩‍💻️" required>
         </div>
-
         <div>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" placeholder="🔑️" required>
         </div>
-
         <div class="buttons">
-            <button type="submit" form="loginForm">Login</button>
+            <button type="submit">Login</button>
         </div>
         <div>
-            Not a Member? <a href="{% url 'signup' %}" class="btn" style="color: red;">Signup</a> 
+            Not a Member? <a href="{% url 'signup' %}" style="color: red;">Signup</a> 
         </div>
+        {% if messages %}
+            {% for message in messages %}
+                <p style="color: red;">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
     </form>
     
 </body>

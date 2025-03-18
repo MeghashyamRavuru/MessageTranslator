@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import pymysql
+pymysql.install_as_MySQLdb()
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,8 +29,12 @@ SECRET_KEY = 'django-insecure-mhe@me2%mt6jd==+dl&6(6l2vitsuw%x3l+^ao27%2mpgyt(y0
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "testserver",
+      "*" , 
+]
 
 
 # Application definition
@@ -77,8 +85,12 @@ WSGI_APPLICATION = 'MessageTranslator.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'Messagetranslator',
+        'USER': 'root',
+        'PASSWORD': 'secret',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
@@ -114,6 +126,9 @@ USE_I18N = True
 USE_TZ = True
 
 
+AUTH_USER_MODEL = 'Backend.CustomUser'  # Replace 'Backend' with your actual app name
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
@@ -130,6 +145,14 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",  # If testing locally
+    "http://127.0.0.1:8000",  # If using localhost IP
+    
+]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
