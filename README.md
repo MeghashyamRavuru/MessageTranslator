@@ -16,9 +16,12 @@ cd MessageTranslator
 python3 -m venv venv<br>
 source venv/bin/activate  # On Windows, use: venv\Scripts\activate
 
-3️⃣ Install Django
+3️⃣ Installations
 
-pip install django
+pip install django<br>
+pip install mysqlclient<br>
+pip install pymysql
+
 
 4️⃣ Apply Migrations
 
