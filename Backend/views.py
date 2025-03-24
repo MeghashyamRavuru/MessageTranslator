@@ -3,6 +3,9 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 from .models import CustomUser
+from django.http import JsonResponse
+from django.db import connection
+from .models import create_user_table
 
 
 def signup_view(request):
@@ -42,4 +45,36 @@ def logout_view(request):
 
 def home_view(request):
     return render(request, 'index.html')
+
+
+
+def store_message(request):
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        message = request.POST.get("message", "").strip()
+
+        if not username or not message:
+            return JsonResponse({"error": "Username and message are required"}, status=400)
+
+        # Create the user's table if not exists
+        table_name = create_user_table(username)
+
+        # Insert the message
+        with connection.cursor() as cursor:
+            cursor.execute(f"INSERT INTO {table_name} (message) VALUES (%s)", [message])
+
+        return JsonResponse({"success": f"Message stored in {table_name} table"})
+    
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+def get_messages(request, username):
+    table_name = username.replace(" ", "_").lower()
+    
+    with connection.cursor() as cursor:
+        cursor.execute(f"SELECT message, timestamp FROM {table_name} ORDER BY timestamp DESC")
+        messages = cursor.fetchall()
+
+    return JsonResponse({"messages": messages})
+
+
 
