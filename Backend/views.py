@@ -6,6 +6,7 @@ from .models import CustomUser
 from django.http import JsonResponse
 from django.db import connection
 from .models import create_user_table
+from django.contrib.auth.decorators import login_required
 
 
 def signup_view(request):
@@ -48,33 +49,55 @@ def home_view(request):
 
 
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
+from django.db import connection
+from .models import CustomUser, create_user_table, translator
+import json
+
+@csrf_exempt
 def store_message(request):
     if request.method == "POST":
-        username = request.POST.get("username", "").strip()
-        message = request.POST.get("message", "").strip()
+        data = json.loads(request.body)
+        sender_username = data.get("sender", "").strip()
+        receiver_username = data.get("receiver", "").strip()
+        message = data.get("message", "").strip()
 
-        if not username or not message:
-            return JsonResponse({"error": "Username and message are required"}, status=400)
+        if not sender_username or not receiver_username or not message:
+            return JsonResponse({"error": "All fields are required"}, status=400)
 
-        # Create the user's table if not exists
-        table_name = create_user_table(username)
+        sender = get_object_or_404(CustomUser, username=sender_username)
+        receiver = get_object_or_404(CustomUser, username=receiver_username)
+        table_name = create_user_table(sender_username)
 
-        # Insert the message
+        translated_text = translator.translate(message, dest=receiver.language).text
+
         with connection.cursor() as cursor:
-            cursor.execute(f"INSERT INTO {table_name} (message) VALUES (%s)", [message])
+            cursor.execute(f"INSERT INTO {table_name} (sender, receiver, message, translated_message) VALUES (%s, %s, %s, %s)", [sender_username, receiver_username, message, translated_text])
 
-        return JsonResponse({"success": f"Message stored in {table_name} table"})
+        return JsonResponse({"success": "Message stored successfully", "translated_message": translated_text})
     
     return JsonResponse({"error": "Invalid request"}, status=400)
 
+
 def get_messages(request, username):
     table_name = username.replace(" ", "_").lower()
-    
     with connection.cursor() as cursor:
-        cursor.execute(f"SELECT message, timestamp FROM {table_name} ORDER BY timestamp DESC")
+        cursor.execute(f"SELECT sender, receiver, message, translated_message, timestamp FROM {table_name} ORDER BY timestamp DESC")
         messages = cursor.fetchall()
 
     return JsonResponse({"messages": messages})
 
+@login_required
+def get_authenticated_user(request):
+    return JsonResponse({"username": request.user.username})
 
 
+@login_required
+def get_users(request):
+    users = CustomUser.objects.values_list("username", flat=True)
+    return JsonResponse({"users": list(users)})
+
+def chat(request):
+    return render(request, 'chat.html')

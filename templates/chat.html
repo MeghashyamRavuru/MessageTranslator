@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Application</title>
+    <link rel="stylesheet" href="chat.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .chat-container {
+            display: flex;
+            width: 600px;
+            height: 400px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 200px;
+            background: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #ccc;
+        }
+        .header {
+            background-color: #add8e6;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 5px;
+        }
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            width: 15px;
+            height: 15px;
+        }
+        .search {
+            padding: 8px;
+            border: none;
+            outline: none;
+            width: 100%;
+            padding-left: 30px;
+        }
+        .chat-list {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .chat-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #ccc;
+        }
+        .chat-item:hover {
+            background: #d0d0d0;
+        }
+        .chat-box {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            font-weight: bold;
+        }
+        .messages {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ccc;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .message span {
+            font-weight: bold;
+        }
+        .message-input {
+            padding: 8px;
+            border: none;
+            border-top: 1px solid #ccc;
+            outline: none;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="sidebar">
+            <div class="header">Chats</div>
+            <div class="search-container">
+                <img src="search.jpeg" class="search-icon">
+                <input type="text" class="search" placeholder="Search" id="searchInput">
+            </div>
+            <div class="chat-list" id="chatList"></div>
+        </div>
+        <div class="chat-box">
+            <div class="chat-header" id="chatHeader">Select a user</div>
+            <div class="messages" id="messages"></div>
+            <input type="text" class="message-input" placeholder="Enter a message" id="messageInput">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    
+    <script>
+        let currentUser = "";
+        
+        function fetchAuthenticatedUser() {
+            fetch("/get_authenticated_user/")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.username) {
+                        currentUser = data.username;
+                        loadChatPartners();
+                    } else {
+                        alert("User not authenticated.");
+                    }
+                });
+        }
+        
+        function loadChatPartners() {
+            fetch("/get_users/")
+                .then(response => response.json())
+                .then(data => {
+                    let chatList = document.getElementById("chatList");
+                    chatList.innerHTML = "";
+                    data.users.forEach(user => {
+                        if (user !== currentUser) {
+                            let chatItem = document.createElement("div");
+                            chatItem.className = "chat-item";
+                            chatItem.textContent = user;
+                            chatItem.onclick = function() {
+                                document.getElementById("chatHeader").textContent = user;
+                                document.getElementById("messages").innerHTML = "";
+                            };
+                            chatList.appendChild(chatItem);
+                        }
+                    });
+                });
+        }
+        
+        function sendMessage() {
+            let message = document.getElementById("messageInput").value;
+            let receiver = document.getElementById("chatHeader").textContent;
+            if (receiver === "Select a user") {
+                alert("Please select a user to chat with.");
+                return;
+            }
+            
+            fetch("/store_message/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sender: currentUser, receiver, message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let msgBox = document.getElementById("messages");
+                msgBox.innerHTML += `<div class='message'><span>You:</span> ${message} <br> <span>Translated:</span> ${data.translated_message}</div>`;
+                document.getElementById("messageInput").value = "";
+            });
+        }
+        
+        fetchAuthenticatedUser();
+    </script>
+</body>
+</html>
