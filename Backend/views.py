@@ -59,7 +59,6 @@ from googletrans import Translator
 from .models import CustomUser, Message
 
 translator = Translator()
-
 @csrf_exempt
 def store_message(request):
     if request.method == "POST":
@@ -74,10 +73,15 @@ def store_message(request):
         sender = get_object_or_404(CustomUser, username=sender_username)
         receiver = get_object_or_404(CustomUser, username=receiver_username)
 
-        # Translate the message to receiver's language
-        translated_text = translator.translate(message, dest=receiver.language).text
+        # Set default language for admin if not specified
+        dest_language = receiver.language if receiver.language else 'en'
+        
+        try:
+            translated_text = translator.translate(message, dest=dest_language).text
+        except Exception as e:
+            return JsonResponse({"error": f"Translation failed: {str(e)}"}, status=500)
 
-        # Store message in database
+        # Store message in the database
         Message.objects.create(sender=sender, receiver=receiver, message=message, translated_message=translated_text)
 
         return JsonResponse({"success": "Message stored successfully", "translated_message": translated_text})
