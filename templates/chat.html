@@ -119,7 +119,8 @@
     
     <script>
         let currentUser = "";
-        
+        let selectedUser = "";
+    
         function fetchAuthenticatedUser() {
             fetch("/get_authenticated_user/")
                 .then(response => response.json())
@@ -132,7 +133,7 @@
                     }
                 });
         }
-        
+    
         function loadChatPartners() {
             fetch("/get_users/")
                 .then(response => response.json())
@@ -145,37 +146,55 @@
                             chatItem.className = "chat-item";
                             chatItem.textContent = user;
                             chatItem.onclick = function() {
+                                selectedUser = user;
                                 document.getElementById("chatHeader").textContent = user;
-                                document.getElementById("messages").innerHTML = "";
+                                fetchMessages(user);
                             };
                             chatList.appendChild(chatItem);
                         }
                     });
                 });
         }
-        
+    
+        function fetchMessages(user) {
+            fetch(`/get_messages/${user}/`)
+                .then(response => response.json())
+                .then(data => {
+                    let msgBox = document.getElementById("messages");
+                    msgBox.innerHTML = "";
+                    data.messages.forEach(msg => {
+                        let messageDiv = document.createElement("div");
+                        messageDiv.className = "message";
+                        messageDiv.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message} <br> <span style="color: gray">Translated: ${msg.translated_message}</span>`;
+                        msgBox.appendChild(messageDiv);
+                    });
+                });
+        }
+    
         function sendMessage() {
             let message = document.getElementById("messageInput").value;
-            let receiver = document.getElementById("chatHeader").textContent;
-            if (receiver === "Select a user") {
+            if (selectedUser === "") {
                 alert("Please select a user to chat with.");
                 return;
             }
-            
+    
             fetch("/store_message/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ sender: currentUser, receiver, message })
+                body: JSON.stringify({ sender: currentUser, receiver: selectedUser, message })
             })
             .then(response => response.json())
             .then(data => {
                 let msgBox = document.getElementById("messages");
-                msgBox.innerHTML += `<div class='message'><span>You:</span> ${message} <br> <span>Translated:</span> ${data.translated_message}</div>`;
+                let messageDiv = document.createElement("div");
+                messageDiv.className = "message";
+                messageDiv.innerHTML = `<strong>You:</strong> ${message} <br> <span style="color: gray">Translated: ${data.translated_message}</span>`;
+                msgBox.appendChild(messageDiv);
                 document.getElementById("messageInput").value = "";
             });
         }
-        
+    
         fetchAuthenticatedUser();
-    </script>
+    </script>    
 </body>
 </html>

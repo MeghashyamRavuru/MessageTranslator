@@ -13,6 +13,7 @@ from googletrans import Translator
 
 translator = Translator()
 
+
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     language = models.CharField(max_length=50, choices=[
@@ -23,32 +24,19 @@ class CustomUser(AbstractUser):
         ('kn', 'Kannada'),
     ])
 
-    groups = models.ManyToManyField(
-        "auth.Group",
-        related_name="customuser_groups",
-        blank=True
-    )
-    user_permissions = models.ManyToManyField(
-        "auth.Permission",
-        related_name="customuser_permissions",
-        blank=True
-    )
-
     def __str__(self):
         return self.username
 
-def create_user_table(username):
-    """Create a table for a user dynamically"""
-    table_name = username.replace(" ", "_").lower()
-    with connection.cursor() as cursor:
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS {table_name} (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                sender TEXT NOT NULL,
-                receiver TEXT NOT NULL,
-                message TEXT NOT NULL,
-                translated_message TEXT NOT NULL,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-    return table_name
+class Message(models.Model):
+    sender = models.ForeignKey(CustomUser, related_name="sent_messages", on_delete=models.CASCADE)
+    receiver = models.ForeignKey(CustomUser, related_name="received_messages", on_delete=models.CASCADE)
+    message = models.TextField()
+    translated_message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sender.username} -> {self.receiver.username}: {self.message}"
+
+
+
+
