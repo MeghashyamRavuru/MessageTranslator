@@ -165,12 +165,15 @@
                     data.messages.forEach(msg => {
                         let messageDiv = document.createElement("div");
                         messageDiv.className = "message";
-                        messageDiv.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message} <br> <span style="color: gray">Translated: ${msg.translated_message}</span>`;
+                        messageDiv.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message} <br> 
+                                                <span style="color: gray">Translated: ${msg.translated_message}</span>`;
                         msgBox.appendChild(messageDiv);
                     });
                 });
         }
-    
+
+
+            
         function sendMessage() {
             let message = document.getElementById("messageInput").value;
             if (selectedUser === "") {

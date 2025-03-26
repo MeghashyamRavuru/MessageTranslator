@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.db import connection
 #from .models import create_user_table
 from django.contrib.auth.decorators import login_required
-
+from django.views.decorators.csrf import csrf_exempt
 
 def signup_view(request):
     if request.method == 'POST':
@@ -26,7 +26,7 @@ def signup_view(request):
     return render(request, 'signup.html', {'form': form})
 
 
-
+@csrf_exempt
 def login_view(request):
     if request.method == 'POST':
         form = CustomAuthenticationForm(data=request.POST)
@@ -89,16 +89,29 @@ def store_message(request):
     return JsonResponse({"error": "Invalid request"}, status=400)
 
 
-def get_messages(request, username):
-    current_user = request.user
-    chat_user = get_object_or_404(CustomUser, username=username)
+@login_required
+def get_messages(request, username=None):
+    current_user = request.user  # Get the authenticated user
 
-    # Fetch messages where the user is either sender or receiver
-    messages = Message.objects.filter(
-        sender=current_user, receiver=chat_user
-    ) | Message.objects.filter(
-        sender=chat_user, receiver=current_user
-    ).order_by("timestamp")
+    # Check if the user is an admin
+    if current_user.is_superuser:
+        if username:
+            chat_user = get_object_or_404(CustomUser, username=username)
+            messages = Message.objects.filter(sender=chat_user) | Message.objects.filter(receiver=chat_user)
+        else:
+            messages = Message.objects.all()  # Admin sees all messages
+    else:
+        if username:
+            chat_user = get_object_or_404(CustomUser, username=username)
+            messages = Message.objects.filter(
+                sender=current_user, receiver=chat_user
+            ) | Message.objects.filter(
+                sender=chat_user, receiver=current_user
+            )
+        else:
+            messages = Message.objects.filter(sender=current_user) | Message.objects.filter(receiver=current_user)
+
+    messages = messages.order_by("timestamp")  # Sort by timestamp
 
     message_list = [
         {
