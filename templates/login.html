@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    {% load static %}
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center; 
+            align-items: center;   
+            background-image: url("{% static 'images/login.jpeg' %}");
+            background-size: cover;
+            background-position: center;
+        }
+
+        h2 {
+            text-align: center;
+            font-style: italic; 
+            font-size: 24px;
+        }
+
+        form {
+            width: 300px;
+            padding: 20px;
+            color: white;
+        }
+
+        div {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            border-radius: 8px; 
+            border: 1px solid #ccc;
+            background-color: white; 
+        }
+
+        .buttons {
+            text-align: center;
+        }
+
+        button {
+            width: auto;
+            padding: 12px 20px;
+            background-color: #a0e6f1;  
+            color: black; 
+            border: none;
+            border-radius: 8px; 
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #1E90FF;
+        }
+
+        /* Back button styling */
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .back-button:hover {
+            background-color: #dcdcdc;
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button -->
+    <button class="back-button" onclick="history.back()">🔙 Back</button>
+
+    <form id="loginForm" method="POST">
+        {% csrf_token %}
+        <h2>Login</h2>
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="👩‍💻️" required>
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="🔑️" required>
+        </div>
+        <div class="buttons">
+            <button type="submit">Login</button>
+        </div>
+        <div>
+            Not a Member? <a href="{% url 'signup' %}" style="color: red;">Signup</a> 
+        </div>
+        {% if messages %}
+            {% for message in messages %}
+                <p style="color: red;">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    </form>
+</body>
+</html>

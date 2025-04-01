@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Application</title>
+    <link rel="stylesheet" href="chat.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .chat-container {
+            display: flex;
+            width: 600px;
+            height: 400px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 200px;
+            background: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #ccc;
+        }
+        .header {
+            background-color: #add8e6;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 5px;
+        }
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            width: 15px;
+            height: 15px;
+        }
+        .search {
+            padding: 8px;
+            border: none;
+            outline: none;
+            width: 100%;
+            padding-left: 30px;
+        }
+        .chat-list {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .chat-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #ccc;
+        }
+        .chat-item:hover {
+            background: #d0d0d0;
+        }
+        .chat-box {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            font-weight: bold;
+        }
+        .messages {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ccc;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .message span {
+            font-weight: bold;
+        }
+        .message-input {
+            padding: 8px;
+            border: none;
+            border-top: 1px solid #ccc;
+            outline: none;
+            width: 100%;
+        }
+        /* Back button styling */
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .back-button:hover {
+            background-color: #dcdcdc;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="history.back()">🔙 Back</button>
+    <div class="chat-container">
+        <div class="sidebar">
+            <div class="header">Chats</div>
+            <div class="search-container">
+                <img src="search.jpeg" class="search-icon">
+                <input type="text" class="search" placeholder="🔍️  Search" id="searchInput">
+            </div>
+            <div class="chat-list" id="chatList"></div>
+        </div>
+        <div class="chat-box">
+            <div class="chat-header" id="chatHeader">Select a user</div>
+            <div class="messages" id="messages"></div>
+            <!-- Message input and send button -->
+            <div id="messageInputContainer" style="display: none;">
+                <input type="text" class="message-input" placeholder="Enter a message" id="messageInput" onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentUser = "";
+        let selectedUser = "";
+        let allUsers = [];
+        let lastMessageTimestamp = null;
+        
+        function fetchAuthenticatedUser() {
+            fetch("/get_authenticated_user/")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.username) {
+                        currentUser = data.username;
+                        loadChatPartners();
+                    } else {
+                        alert("User not authenticated.");
+                    }
+                });
+        }
+
+        function loadChatPartners() {
+            fetch("/get_users/")
+                .then(response => response.json())
+                .then(data => {
+                    allUsers = data.users; // Store all users for search
+                    displayUsers(allUsers); // Display all users initially
+                });
+        }
+
+        function displayUsers(users) {
+            let chatList = document.getElementById("chatList");
+            chatList.innerHTML = "";
+            users.forEach(user => {
+                if (user !== currentUser) {
+                    let chatItem = document.createElement("div");
+                    chatItem.className = "chat-item";
+                    chatItem.textContent = user;
+                    chatItem.onclick = function () {
+                        selectedUser = user;
+                        document.getElementById("chatHeader").textContent = user;
+                        document.getElementById("messageInputContainer").style.display = "flex"; // Show input box
+                        fetchMessages(user);
+                        startPolling(); // Start polling for new messages
+                    };
+                    chatList.appendChild(chatItem);
+                }
+            });
+        }
+
+        function fetchMessages(user) {
+            fetch(`/get_messages/${user}/`)
+                .then(response => response.json())
+                .then(data => {
+                    let msgBox = document.getElementById("messages");
+                    msgBox.innerHTML = ""; // Clear the chat window
+                    data.messages.forEach(msg => {
+                        let messageDiv = document.createElement("div");
+                        messageDiv.className = "message";
+                        messageDiv.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message} <br> 
+                                                <span style="color: gray">Translated: ${msg.translated_message}</span>`;
+                        msgBox.appendChild(messageDiv);
+                    });
+
+                    // Update the last message timestamp
+                    if (data.messages.length > 0) {
+                        lastMessageTimestamp = data.messages[data.messages.length - 1].timestamp;
+                    }
+                });
+        }
+
+        function sendMessage() {
+            let message = document.getElementById("messageInput").value;
+            if (selectedUser === "") {
+                alert("Please select a user to chat with.");
+                return;
+            }
+
+            fetch("/store_message/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sender: currentUser, receiver: selectedUser, message })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById("messageInput").value = ""; // Clear the input box
+                    } else {
+                        alert("Failed to send message: " + data.error);
+                    }
+                });
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+
+        // Polling for new messages
+        function startPolling() {
+            setInterval(() => {
+                if (selectedUser) {
+                    fetch(`/get_messages/${selectedUser}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            let msgBox = document.getElementById("messages");
+                            data.messages.forEach(msg => {
+                                // Only add new messages
+                                if (!lastMessageTimestamp || new Date(msg.timestamp) > new Date(lastMessageTimestamp)) {
+                                    let messageDiv = document.createElement("div");
+                                    messageDiv.className = "message";
+                                    messageDiv.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message} <br> 
+                                                            <span style="color: gray">Translated: ${msg.translated_message}</span>`;
+                                    msgBox.appendChild(messageDiv);
+                                }
+                            });
+
+                            // Update the last message timestamp
+                            if (data.messages.length > 0) {
+                                lastMessageTimestamp = data.messages[data.messages.length - 1].timestamp;
+                            }
+                        });
+                }
+            }, 3000); // Poll every 3 seconds
+        }
+
+        // Search functionality
+        document.getElementById("searchInput").addEventListener("input", function () {
+            const searchTerm = this.value.toLowerCase();
+            const filteredUsers = allUsers.filter(user => user.toLowerCase().includes(searchTerm));
+            displayUsers(filteredUsers); // Display only the filtered users
+        });
+
+        fetchAuthenticatedUser();
+    </script>    
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Translator</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <div class="background-image">
+        <div class="overlay"></div>
+        <h1>Welcome to Chat Translator</h1>
+        <div class="cls">Chat with your loved ones in whatever language you like!</div>
+        <div class="buttons">
+            <a href="{% url 'chat' %}" class="btn">Chat</a>
+            <span style="background-color: yellow; padding: 5px; border-radius: 5px;">👤 {{ user.username }}</span>
+            <a href="{% url 'logout' %}" style="margin-left: 10px; text-decoration: none; color: red; font-weight: bold;">
+             🔓 Logout
+            </a>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="background-image">
+        <div class="overlay"></div>
+        <h1>Welcome to Chat Translator</h1>
+        <div class="cls">Chat with your loved ones in whatever language you like!</div>
+        <div class="buttons">
+            <br><a href="{% url 'login' %}" class="btn">Login</a>
+            <a href="{% url 'signup' %}" class="btn">Signup</a>            
+        </div>
+    </div>
+    {% endif %}
+
+</body>
+</html>
