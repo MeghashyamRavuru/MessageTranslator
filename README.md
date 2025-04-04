@@ -20,7 +20,11 @@ If you haven't cloned the project yet, run:
 
 `pip install django`<br>
 `pip install mysqlclient`<br>
-`pip install pymysql`
+`pip install pymysql`<br>
+pip install channels <br>
+pip install channels daphne channels-redis <br>
+sudo apt install redis-server<br>
+pip install websocket-client<br>
 
 
 4️⃣ Apply Migrations
