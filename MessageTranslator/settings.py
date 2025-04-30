@@ -104,9 +104,9 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'messagetrans',
-        'USER': 'messagetrans',
-        'PASSWORD': '12345678',
+        'NAME': 'MessageTranlator',
+        'USER': 'root',
+        'PASSWORD': '####',
         'HOST': 'localhost',
         'PORT': '3306',
     }
