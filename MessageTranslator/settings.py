@@ -107,7 +107,7 @@ DATABASES = {
         'NAME': 'messagetrans',
         'USER': 'messagetrans',
         'PASSWORD': '12345678',
-        'HOST': 'db4free.net',
+        'HOST': 'localhost',
         'PORT': '3306',
     }
 }
