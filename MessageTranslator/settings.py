@@ -100,14 +100,14 @@ CHANNEL_LAYERS = {
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+# kggnmxxsvkyqpustdp@hthlm.com
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'Messagetranslator',
-        'USER': 'root',
-        'PASSWORD': 'sai091011120703',
-        'HOST': 'localhost',
+        'NAME': 'messagetrans',
+        'USER': 'messagetrans',
+        'PASSWORD': '12345678',
+        'HOST': 'db4free.net',
         'PORT': '3306',
     }
 }
