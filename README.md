@@ -18,13 +18,8 @@ If you haven't cloned the project yet, run:
 
 3️⃣ Installations
 
-`pip install django`<br>
-`pip install mysqlclient`<br>
-`pip install pymysql`<br>
-`pip install channels` <br>
-`pip install channels daphne channels-redis` <br>
+`pip3 install -r requirements.txt`<br>
 `sudo apt install redis-server`<br>
-`pip install websocket-client`<br>
 
 
 4️⃣ Apply Migrations
@@ -33,11 +28,11 @@ Before migrations you have to update your mysql password.
 
 MessageTranslator -> settings.py
 
-`python manage.py makemigrations`<br>
-`python manage.py migrate`
+`python3 manage.py makemigrations`<br>
+`python3 manage.py migrate`
 
 5️⃣ Run the Server
 Start the Django development server:
 
-`python manage.py runserver 0.0.0.0:8000`<br><br>
+`python3 manage.py runserver 0.0.0.0:8000`<br><br>
 Now open http://127.0.0.1:8000/ in your browser. 🎉
