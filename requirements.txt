@@ -1,0 +1,7 @@
+django
+mysqlclient
+pymysql
+channels
+daphne
+channels-redis
+websocket-client
