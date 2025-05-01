@@ -103,13 +103,12 @@ CHANNEL_LAYERS = {
 # kggnmxxsvkyqpustdp@hthlm.com
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'MessageTranlator',
-        'USER': 'root',
-        'PASSWORD': '####',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    }
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.mysql'),
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
 }
 
 
