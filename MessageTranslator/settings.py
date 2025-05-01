@@ -168,7 +168,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",  # If testing locally
     "http://127.0.0.1:8000",
     "http://192.168.3.164",  # If using localhost IP
-    
+    "https://messagetranslator-production.up.railway.app",
 ]
 
 LOGIN_URL = '/login/'  # Redirect unauthenticated users to the login page
