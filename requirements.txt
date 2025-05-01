@@ -5,3 +5,4 @@ channels
 daphne
 channels-redis
 websocket-client
+requests
